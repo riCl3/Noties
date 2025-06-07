@@ -559,12 +559,21 @@ def initialize_transcriber(api_key):
 
 def main():
     # Header
+    # Header
     st.markdown("""
-    <div class="app-header">
-        <div class="app-title">🎧 Noties</div>
-        <div class="app-subtitle">Minimal AI Meeting Summarizer: Transcribe & Summarize Effortlessly</div>
-    </div>
-    """, unsafe_allow_html=True)
+        <div class="app-header">
+            <div class="app-title">🎧 Noties</div>
+            <div class="app-subtitle">Minimal AI Meeting Summarizer: Transcribe & Summarize Effortlessly</div>
+            <div style="margin-top: 1.5rem; font-size: 0.9rem; opacity: 0.8;">
+                <div style="margin-bottom: 0.5rem;">Developed by Soumya, NIT Allahabad</div>
+                <div>
+                    <a href="https://coff.ee/ricl.2" target="_blank" style="color: #fbbf24; text-decoration: none; font-weight: 500;">
+                        ☕ Buy me a coffee
+                    </a>
+                </div>
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
 
     # API Configuration (Front and Center)
     st.markdown("""
