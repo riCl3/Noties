@@ -1,0 +1,32 @@
+# requirements.txt
+streamlit>=1.28.0
+openai-whisper>=20231117
+torch>=2.0.0
+torchaudio>=2.0.0
+google-generativeai>=0.3.0
+python-dotenv>=1.0.0
+pydub>=0.25.1
+sounddevice>=0.4.6
+soundfile>=0.12.1
+numpy>=1.24.0
+pathlib
+
+# .streamlit/config.toml
+[theme]
+base = "dark"
+primaryColor = "#667eea"
+backgroundColor = "#0f172a"
+secondaryBackgroundColor = "#1e293b"
+textColor = "#f8fafc"
+
+[server]
+headless = true
+port = 8501
+enableCORS = false
+enableXsrfProtection = false
+
+# packages.txt (for system dependencies)
+ffmpeg
+portaudio19-dev
+python3-dev
+gcc
