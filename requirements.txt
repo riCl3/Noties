@@ -9,7 +9,7 @@ soundfile
 numpy
 
 # Whisper requires PyTorch
-torch>=2.1.0
+torch>=2.2.0,<2.8.0
 
 # Optional: Use ffmpeg in system PATH for audio conversion
 # For system-wide audio routing, follow OS-specific setup notes below
