@@ -6,19 +6,56 @@ import numpy as np
 from pathlib import Path
 from datetime import datetime
 from pydub import AudioSegment
-import google.generativeai as genai
 import sounddevice as sd
 import soundfile as sf
 import streamlit as st
+# Correctly import BitsAndBytesConfig from transformers
+from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
+from peft import PeftModel
+import torch
 
 
 class AudioTranscriber:
-    def __init__(self, gemini_api_key):
-        self.gemini_api_key = gemini_api_key
-        genai.configure(api_key=gemini_api_key)
-        self.model = genai.GenerativeModel('gemini-1.5-flash')
-        with st.spinner("Loading Whisper model..."):
+    def __init__(self):
+        with st.spinner("Loading models... This may take a moment."):
+            # Load Whisper model for transcription
             self.whisper_model = whisper.load_model("base")
+
+            # Define base model and your fine-tuned adapter
+            base_model_name = "google/gemma-2-2b"
+            adapter_name = "riCl2/gemma-meeting-notes-adapter"
+
+            # Use GPU if available
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+
+            # Load the base model with 4-bit quantization for efficiency
+            bnb_config = BitsAndBytesConfig(  # Use the correctly imported class
+                load_in_4bit=True,
+                bnb_4bit_quant_type="nf4",
+                bnb_4bit_compute_dtype=torch.bfloat16
+            )
+
+            base_model = AutoModelForCausalLM.from_pretrained(
+                base_model_name,
+                quantization_config=bnb_config,
+                device_map="auto"
+            )
+
+            # Load the tokenizer
+            self.tokenizer = AutoTokenizer.from_pretrained(base_model_name)
+            self.tokenizer.pad_token = self.tokenizer.eos_token
+
+            # Apply your LoRA adapter to the base model
+            self.model = PeftModel.from_pretrained(base_model, adapter_name)
+
+            # Create the text generation pipeline
+            self.text_generator = pipeline(
+                "text-generation",
+                model=self.model,
+                tokenizer=self.tokenizer,
+                torch_dtype=torch.bfloat16,
+                device_map="auto",
+            )
 
     def validate_audio_file(self, audio_path):
         if not os.path.exists(audio_path):
@@ -39,41 +76,32 @@ class AudioTranscriber:
         return result["text"]
 
     def summarize_transcript(self, transcript, audio_filename, summary_type="comprehensive"):
-        prompts = {
-            "comprehensive": f"""
-Please analyze and summarize the following audio transcript. The audio file is: \"{audio_filename}\"
-
-Create a comprehensive summary that includes:
-1. Main Topic
-2. Key Points
-3. Notable Quotes
-4. Action Items
-5. Decisions Made
-6. Next Steps
-
-TRANSCRIPT:
-{transcript}
-""",
-            "bullet_points": f"""
-Summarize this audio transcript in bullet points format:
-- Main topics discussed
-- Key decisions made
-- Action items
-- Important points
-
-TRANSCRIPT:
-{transcript}
-""",
-            "brief": f"""
-Provide a brief summary of this meeting transcript:
-
-TRANSCRIPT:
-{transcript}
-"""
+        # These prompts now EXACTLY match your fine-tuning format.
+        instructions = {
+            "comprehensive": f"Analyze the following meeting transcript and provide a comprehensive summary. The audio file is: \"{audio_filename}\"\n\nThe summary should include:\n1. Main Topic\n2. Key Points\n3. Action Items\n4. Decisions Made",
+            "bullet_points": "Summarize this audio transcript in bullet points, focusing on key decisions and action items.",
+            "brief": "Provide a brief, one-paragraph summary of this meeting transcript."
         }
-        prompt = prompts.get(summary_type, prompts["comprehensive"])
-        response = self.model.generate_content(prompt)
-        return response.text
+
+        instruction = instructions.get(summary_type, instructions["comprehensive"])
+
+        prompt = f"### Instruction:\n{instruction}\n\n### Input:\n{transcript}\n\n### Response:\n"
+
+        # Generate text using the Hugging Face pipeline
+        response = self.text_generator(
+            prompt,
+            max_new_tokens=512,  # Adjust as needed
+            num_return_sequences=1,
+            eos_token_id=self.tokenizer.eos_token_id,
+        )
+
+        # Extract the generated text
+        full_text = response[0]['generated_text']
+
+        # Clean up the output to only return the summary part
+        summary = full_text.split("### Response:")[1].strip()
+
+        return summary
 
     def process_audio(self, audio_path, summary_type="comprehensive", cleanup_converted=True):
         converted_path = None
@@ -105,7 +133,7 @@ class SystemAudioRecorder:
         try:
             devices = sd.query_devices()
             return ["Default"] + [f"{i}: {d['name'][:37] + '...' if len(d['name']) > 40 else d['name']}"
-                                   for i, d in enumerate(devices) if d['max_input_channels'] > 0]
+                                  for i, d in enumerate(devices) if d['max_input_channels'] > 0]
         except Exception as e:
             st.error(f"Error getting audio devices: {e}")
             return ["Default"]
@@ -173,12 +201,12 @@ class SystemAudioRecorder:
             return False
 
 
-def initialize_transcriber(api_key):
+def initialize_transcriber():
     try:
-        if not api_key.strip():
-            return "❌ Please enter your Gemini API key"
-        st.session_state.transcriber = AudioTranscriber(api_key.strip())
-        st.session_state.audio_recorder = SystemAudioRecorder(st.session_state.transcriber)
+        # No API key needed now
+        if 'transcriber' not in st.session_state or st.session_state.transcriber is None:
+            st.session_state.transcriber = AudioTranscriber()
+            st.session_state.audio_recorder = SystemAudioRecorder(st.session_state.transcriber)
         return "✅ Transcriber and audio recorder initialized!"
     except Exception as e:
         return f"❌ Initialization error: {str(e)}"
