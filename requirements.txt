@@ -1,7 +1,6 @@
 # Core dependencies for Noties - Streamlit-based AI Meeting Summarizer
 streamlit>=1.29.0
 openai-whisper
-google-generativeai>=0.3.2
 python-dotenv
 pydub
 sounddevice
@@ -11,5 +10,8 @@ numpy
 # Whisper requires PyTorch
 torch>=2.2.0,<2.8.0
 
-# Optional: Use ffmpeg in system PATH for audio conversion
-# For system-wide audio routing, follow OS-specific setup notes below
+# For running the Gemma model locally
+transformers
+accelerate
+bitsandbytes
+peft
