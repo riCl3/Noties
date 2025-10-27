@@ -20,38 +20,18 @@ def render_ui(initialize_transcriber):
         </div>
     """, unsafe_allow_html=True)
 
-    st.markdown("""
-    <div class="api-config-card">
-        <div class="config-title">
-            <span class="card-icon">🔐</span>
-            API Configuration
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    col1, col2 = st.columns([3, 1])
-    with col1:
-        api_key = st.text_input(
-            "Gemini API Key",
-            type="password",
-            placeholder="Enter your Gemini API key here...",
-            help="Get your free API key from Google AI Studio: https://ai.google.dev/"
-        )
-
-    with col2:
-        st.markdown("<br>", unsafe_allow_html=True)
-        if st.button("🔄 Initialize", key="init_btn", use_container_width=True):
-            with st.spinner("Initializing..."):
-                result = initialize_transcriber(api_key)
-                if "✅" in result:
-                    st.success(result)
-                else:
-                    st.error(result)
+    # Initialize automatically
+    if 'transcriber' not in st.session_state or st.session_state.transcriber is None:
+        result = initialize_transcriber()
+        if "✅" in result:
+            st.success(result)
+        else:
+            st.error(result)
 
     if st.session_state.transcriber is not None:
         st.success("✅ Ready to process audio!")
     else:
-        st.warning("⚠️ Please enter your API key and initialize first")
+        st.warning("⚠️ Models are still loading or an error occurred. Please wait or refresh.")
 
     st.markdown("<br>", unsafe_allow_html=True)
     tab1, tab2, tab3 = st.tabs(["📁 Upload Audio", "🎙️ Record Meeting", "ℹ️ About"])
@@ -214,7 +194,7 @@ def render_about_tab(tab):
                 <h4>🎯 Features</h4>
                 <ul style="font-size: 1.1rem; line-height: 1.8;">
                     <li><strong>Smart Transcription:</strong> Uses OpenAI Whisper for accurate speech-to-text</li>
-                    <li><strong>AI Summarization:</strong> Powered by Google Gemini for intelligent summaries</li>
+                    <li><strong>AI Summarization:</strong> Powered by your fine-tuned Gemma model for intelligent summaries</li>
                     <li><strong>Direct Recording:</strong> Capture system audio without browser automation</li>
                     <li><strong>Multiple Formats:</strong> Supports MP3, WAV, M4A, OGG, and FLAC files</li>
                     <li><strong>Privacy First:</strong> All processing happens locally on your machine</li>
@@ -222,19 +202,11 @@ def render_about_tab(tab):
 
                 <h4 style="margin-top: 2rem;">🛠️ How to Use</h4>
                 <ol style="font-size: 1.1rem; line-height: 1.8;">
-                    <li><strong>Setup:</strong> Enter your Gemini API key and click Initialize</li>
+                    <li><strong>Wait for models to load:</strong> The app will initialize automatically.</li>
                     <li><strong>Upload:</strong> Use the "Upload Audio" tab to process existing audio files</li>
                     <li><strong>Record:</strong> Use the "Record Meeting" tab to capture live audio</li>
                     <li><strong>Download:</strong> Save transcripts, summaries, and audio files</li>
                 </ol>
-
-                <h4 style="margin-top: 2rem;">🔑 API Key Setup</h4>
-                <p style="font-size: 1.1rem; line-height: 1.8;">
-                    Get your free Gemini API key from 
-                    <a href="https://ai.google.dev/" target="_blank" style="color: #667eea; text-decoration: none; font-weight: 600;">
-                        Google AI Studio
-                    </a>
-                </p>
             </div>
         </div>
         """, unsafe_allow_html=True)
