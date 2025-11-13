@@ -21,7 +21,7 @@ class AudioTranscriber:
             # Load Whisper model for transcription
             self.whisper_model = whisper.load_model("base")
 
-            # Define base model and your fine-tuned adapter
+            # Defining base model and fine-tuned adapter
             base_model_name = "google/gemma-2-2b"
             adapter_name = "riCl2/gemma-meeting-notes-adapter"
 
