@@ -1,11 +1,21 @@
 streamlit>=1.29.0
+<<<<<<< HEAD
 audioop-lts
+=======
+requests
+>>>>>>> model_migrated
 python-dotenv
-pydub
 sounddevice
 soundfile
 numpy
+<<<<<<< HEAD
 transformers
 torch
 accelerate
 openai-whisper
+=======
+
+# Optional: Use ffmpeg in system PATH for audio conversion
+# For system-wide audio routing, follow OS-specific setup notes below
+# For system-wide audio routing, follow OS-specific setup notes below
+>>>>>>> model_migrated
