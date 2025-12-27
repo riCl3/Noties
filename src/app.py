@@ -1,13 +1,10 @@
-# app.py (clean main entry)
+# app.py
 import os
-<<<<<<< HEAD:app.py
 
 import streamlit as st
-
-=======
 import time
 import tempfile
-import warnings
+import warnings 
 import streamlit as st
 from pathlib import Path
 from datetime import datetime
@@ -18,19 +15,14 @@ from transcriber import TranscriberService
 from summarizer import SummarizerService
 from recorder import SystemAudioRecorder
 from audio_utils import AudioUtils
->>>>>>> model_migrated:src/app.py
 
+# Disable Streamlit file watcher
 os.environ["STREAMLIT_WATCHER_TYPE"] = "none"
 
-<<<<<<< HEAD:app.py
-
-# === Streamlit Setup ===
-=======
 # Suppress warnings
 warnings.filterwarnings("ignore", category=UserWarning, module="gradio.components.dropdown")
 
 # Page configuration
->>>>>>> model_migrated:src/app.py
 st.set_page_config(
     page_title="Noties - AI Meeting Summarizer",
     page_icon="🎧",
@@ -38,23 +30,19 @@ st.set_page_config(
     initial_sidebar_state="collapsed"
 )
 
-# === Load External CSS ===
-with open("styles.css") as f:
-    st.markdown(f"<style>{f.read()}</style>", unsafe_allow_html=True)
+# Custom CSS for modern dark styling
+st.markdown("""
+<style>
+    /* Import Google Fonts */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
-# === Import Core Logic ===
-from core import initialize_transcriber
-from ui_layout import render_ui
+    /* Global Styles */
+    html, body, [class*="css"] {
+        font-family: 'Inter', sans-serif;
+        background-color: #0f172a !important;
+        color: #f8fafc !important;
+    }
 
-<<<<<<< HEAD:app.py
-# === Initialize State ===
-if 'transcriber' not in st.session_state:
-    st.session_state.transcriber = None
-if 'audio_recorder' not in st.session_state:
-    st.session_state.audio_recorder = None
-
-# === Start UI ===
-=======
     /* Hide Streamlit branding */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
@@ -686,6 +674,5 @@ def main():
             """, unsafe_allow_html=True)
 
 
->>>>>>> model_migrated:src/app.py
 if __name__ == "__main__":
-    render_ui(initialize_transcriber)
+    main()

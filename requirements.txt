@@ -3,7 +3,11 @@ streamlit>=1.29.0
 audioop-lts
 =======
 requests
+<<<<<<< HEAD
 >>>>>>> model_migrated
+=======
+>>>>>>> a0aae95 (migrated to gemma-3-270m-fine_tuned)
+>>>>>>> e658574 (migration)
 python-dotenv
 sounddevice
 soundfile
@@ -18,4 +22,8 @@ openai-whisper
 # Optional: Use ffmpeg in system PATH for audio conversion
 # For system-wide audio routing, follow OS-specific setup notes below
 # For system-wide audio routing, follow OS-specific setup notes below
+<<<<<<< HEAD
 >>>>>>> model_migrated
+=======
+>>>>>>> a0aae95 (migrated to gemma-3-270m-fine_tuned)
+>>>>>>> e658574 (migration)
