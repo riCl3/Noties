@@ -1,15 +1,11 @@
 # app.py (clean main entry)
 import os
-import types
-import torch
-import warnings
+
 import streamlit as st
 
-# === Compatibility Fixes ===
-if hasattr(torch, 'classes') and not hasattr(torch.classes, '__path__'):
-    torch.classes.__path__ = types.SimpleNamespace(_path=[])
+
 os.environ["STREAMLIT_WATCHER_TYPE"] = "none"
-warnings.filterwarnings("ignore", category=UserWarning, module="gradio.components.dropdown")
+
 
 # === Streamlit Setup ===
 st.set_page_config(

@@ -1,7 +1,7 @@
 # core.py
 import os
 import time
-import whisper
+import requests
 import numpy as np
 from pathlib import Path
 from datetime import datetime
@@ -9,57 +9,25 @@ from pydub import AudioSegment
 import sounddevice as sd
 import soundfile as sf
 import streamlit as st
-# Correctly import BitsAndBytesConfig from transformers
-from transformers import AutoTokenizer, AutoModelForCausalLM, pipeline, BitsAndBytesConfig
-from peft import PeftModel
-import torch
-
 
 class AudioTranscriber:
     def __init__(self):
-        with st.spinner("Loading models... This may take a moment."):
-            # Load Whisper model for transcription
-            self.whisper_model = whisper.load_model("base")
-
-            # Defining base model and fine-tuned adapter
-            base_model_name = "google/gemma-2-2b"
-            adapter_name = "riCl2/gemma-meeting-notes-adapter"
-
-            # Use GPU if available
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-
-            # Load the base model with 4-bit quantization for efficiency
-            bnb_config = BitsAndBytesConfig(  # Use the correctly imported class
-                load_in_4bit=True,
-                bnb_4bit_quant_type="nf4",
-                bnb_4bit_compute_dtype=torch.bfloat16
-            )
-
-            base_model = AutoModelForCausalLM.from_pretrained(
-                base_model_name,
-                quantization_config=bnb_config,
-                device_map="auto"
-            )
-
-            # Load the tokenizer
-            self.tokenizer = AutoTokenizer.from_pretrained(base_model_name)
-            self.tokenizer.pad_token = self.tokenizer.eos_token
-
-            # Apply your LoRA adapter to the base model
-            self.model = PeftModel.from_pretrained(base_model, adapter_name)
-
-            # Create the text generation pipeline
-            self.text_generator = pipeline(
-                "text-generation",
-                model=self.model,
-                tokenizer=self.tokenizer,
-                torch_dtype=torch.bfloat16,
-                device_map="auto",
-            )
+        with st.spinner("Connecting to AI Cloud Services..."):
+            # Configuration for the Hugging Face Inference API
+            self.hf_token = os.getenv("HF_TOKEN")
+            self.headers = {"Authorization": f"Bearer {self.hf_token}"}
+            
+            # API Endpoints
+            # Whisper for transcription (Speech-to-Text)
+            self.whisper_url = "https://api-inference.huggingface.co/models/openai/whisper-large-v3"
+            
+            # Your fine-tuned Gemma-3 model for summarization
+            # Replace with [Your-HF-Username]/[Your-Model-Name]
+            self.gemma_url = "https://api-inference.huggingface.co/models/[Your-HF-Username]/[Your-Model-Name]"
 
     def validate_audio_file(self, audio_path):
         if not os.path.exists(audio_path):
-            raise Exception(f"Audio not found: {audio_path}")
+            raise Exception(f"Audio file not found: {audio_path}")
         return True
 
     def convert_to_wav(self, audio_path):
@@ -72,46 +40,71 @@ class AudioTranscriber:
         return output_path
 
     def transcribe_audio(self, audio_path):
-        result = self.whisper_model.transcribe(audio_path)
-        return result["text"]
+        """Sends audio binary to Hugging Face Whisper API for transcription."""
+        with open(audio_path, "rb") as f:
+            data = f.read()
+        
+        # Calling the Serverless Inference API for Whisper
+        response = requests.post(self.whisper_url, headers=self.headers, data=data)
+        
+        if response.status_code == 200:
+            return response.json().get("text", "Transcription failed or returned empty.")
+        else:
+            raise Exception(f"Whisper API Error: {response.status_code} - {response.text}")
 
     def summarize_transcript(self, transcript, audio_filename, summary_type="comprehensive"):
-        # These prompts now EXACTLY match your fine-tuning format.
+        """Sends transcript to your merged Gemma-3 model for AI summarization."""
         instructions = {
             "comprehensive": f"Analyze the following meeting transcript and provide a comprehensive summary. The audio file is: \"{audio_filename}\"\n\nThe summary should include:\n1. Main Topic\n2. Key Points\n3. Action Items\n4. Decisions Made",
-            "bullet_points": "Summarize this audio transcript in bullet points, focusing on key decisions and action items.",
+            "bullet_points": "Summarize this audio transcript in clear bullet points, focusing on key decisions and action items.",
             "brief": "Provide a brief, one-paragraph summary of this meeting transcript."
         }
 
         instruction = instructions.get(summary_type, instructions["comprehensive"])
+        
+        # Gemma-3 chat format
+        prompt = f"<bos><start_of_turn>user\n{instruction}\n\n{transcript}<end_of_turn>\n<start_of_turn>model\n"
 
-        prompt = f"### Instruction:\n{instruction}\n\n### Input:\n{transcript}\n\n### Response:\n"
+        payload = {
+            "inputs": prompt,
+            "parameters": {
+                "max_new_tokens": 512,
+                "temperature": 0.7,
+                "return_full_text": False
+            },
+            "options": {
+                "wait_for_model": True # Ensures the model loads if it was inactive
+            }
+        }
 
-        # Generate text using the Hugging Face pipeline
-        response = self.text_generator(
-            prompt,
-            max_new_tokens=512,  # Adjust as needed
-            num_return_sequences=1,
-            eos_token_id=self.tokenizer.eos_token_id,
-        )
-
-        # Extract the generated text
-        full_text = response[0]['generated_text']
-
-        # Clean up the output to only return the summary part
-        summary = full_text.split("### Response:")[1].strip()
-
-        return summary
+        # Calling the Serverless Inference API for your Gemma model
+        response = requests.post(self.gemma_url, headers=self.headers, json=payload)
+        
+        if response.status_code == 200:
+            result = response.json()
+            if isinstance(result, list) and len(result) > 0:
+                # The API often returns the full text or just the generation depending on endpoint config.
+                # Usually return_full_text=False handles it, but let's be safe.
+                return result[0].get('generated_text', "No summary returned.").strip()
+            return "Unexpected response format from summarizer API."
+        else:
+            raise Exception(f"Gemma API Error: {response.status_code} - {response.text}")
 
     def process_audio(self, audio_path, summary_type="comprehensive", cleanup_converted=True):
         converted_path = None
         try:
             self.validate_audio_file(audio_path)
             converted_path = self.convert_to_wav(audio_path)
+            
+            # Step 1: Transcribe via Cloud API
             transcript = self.transcribe_audio(converted_path)
+            
+            # Step 2: Summarize via Cloud API
             summary = self.summarize_transcript(transcript, Path(audio_path).name, summary_type)
+            
             if cleanup_converted and converted_path != audio_path:
                 os.remove(converted_path)
+                
             return {
                 'filename': Path(audio_path).name,
                 'original_path': audio_path,
@@ -121,7 +114,6 @@ class AudioTranscriber:
             }
         except Exception as e:
             raise e
-
 
 class SystemAudioRecorder:
     def __init__(self, transcriber):
@@ -180,8 +172,9 @@ class SystemAudioRecorder:
 
             filename = f"meeting_recording_{datetime.now().strftime('%Y%m%d_%H%M%S')}.wav"
             sf.write(filename, audio_data, sample_rate)
+            
             if not os.path.exists(filename) or os.path.getsize(filename) < 1000:
-                raise Exception("Audio file not created properly")
+                raise Exception("Audio file was not recorded successfully.")
 
             progress_bar.progress(100)
             status_text.text("Recording completed!")
@@ -200,13 +193,15 @@ class SystemAudioRecorder:
         except:
             return False
 
-
 def initialize_transcriber():
     try:
-        # No API key needed now
+        # Check for the required token in .env
+        if not os.getenv("HF_TOKEN"):
+            return "❌ Error: HF_TOKEN not found. Please add it to your .env file."
+            
         if 'transcriber' not in st.session_state or st.session_state.transcriber is None:
             st.session_state.transcriber = AudioTranscriber()
             st.session_state.audio_recorder = SystemAudioRecorder(st.session_state.transcriber)
-        return "✅ Transcriber and audio recorder initialized!"
+        return "✅ AI Cloud Services initialized!"
     except Exception as e:
         return f"❌ Initialization error: {str(e)}"
