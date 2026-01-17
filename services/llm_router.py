@@ -20,9 +20,16 @@ class LLMRouter:
         litellm.set_verbose = False  # Disable verbose logging
         
         # Load API key from environment (stored as OPENAI_API_KEY for OpenRouter)
-        self.api_key = os.getenv("OPENAI_API_KEY")
+        self.api_key = os.getenv("OPENAI_API_KEY", "").strip()
         if not self.api_key:
             raise ValueError("OPENAI_API_KEY not found in .env file. Please add your OpenRouter API key.")
+
+        # INFO: Print loaded key for debugging (masked)
+        safe_key = f"{self.api_key[:10]}...{self.api_key[-4:]}" if len(self.api_key) > 10 else "INVALID"
+        print(f"DEBUG: Loaded API Key: {safe_key}")
+        
+        # Ensure environment variable is set for LiteLLM internal usages
+        os.environ["OPENAI_API_KEY"] = self.api_key
         
         self.api_base = "https://openrouter.ai/api/v1"
         

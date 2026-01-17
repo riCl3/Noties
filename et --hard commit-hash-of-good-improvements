@@ -1,0 +1,24 @@
+[33m20f34d8[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mimprovements-clean[m[33m)[m HEAD@{0}: commit (initial): Clean improvements branch with only desired files
+[33me8d3426[m[33m ([m[1;31morigin/improvements[m[33m, [m[1;32mimprovements[m[33m)[m HEAD@{1}: commit: cleanp
+[33mce52f18[m HEAD@{2}: checkout: moving from master to improvements
+[33m095a20e[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{3}: checkout: moving from improvements to master
+[33mce52f18[m HEAD@{4}: commit: secrect masking
+[33m4e9c24e[m HEAD@{5}: commit: v.2.0.1
+[33m0b7ae98[m HEAD@{6}: checkout: moving from master to improvements
+[33m095a20e[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{7}: commit (merge): Merge branch 'master' of https://github.com/riCl3/Noties
+[33m30b2bbd[m HEAD@{8}: merge improvements: Merge made by the 'ort' strategy.
+[33m05cbb27[m HEAD@{9}: checkout: moving from improvements to master
+[33m0b7ae98[m HEAD@{10}: commit: v 2.0.0
+[33m71f3128[m[33m ([m[1;32mswitch[m[33m)[m HEAD@{11}: checkout: moving from fine_tune to improvements
+[33m5cc23c0[m[33m ([m[1;31morigin/fine_tune[m[33m, [m[1;32mfine_tune[m[33m)[m HEAD@{12}: reset: moving to HEAD
+[33m5cc23c0[m[33m ([m[1;31morigin/fine_tune[m[33m, [m[1;32mfine_tune[m[33m)[m HEAD@{13}: checkout: moving from improvements to fine_tune
+[33m71f3128[m[33m ([m[1;32mswitch[m[33m)[m HEAD@{14}: checkout: moving from fine_tune to improvements
+[33m5cc23c0[m[33m ([m[1;31morigin/fine_tune[m[33m, [m[1;32mfine_tune[m[33m)[m HEAD@{15}: commit: v.2.0.0
+[33mc51760b[m HEAD@{16}: commit: Fine Tuning with Hugging Face
+[33m21ca69c[m[33m ([m[1;31morigin/code_clean_up[m[33m, [m[1;32mcode_clean_up[m[33m)[m HEAD@{17}: checkout: moving from code_clean_up to fine_tune
+[33m21ca69c[m[33m ([m[1;31morigin/code_clean_up[m[33m, [m[1;32mcode_clean_up[m[33m)[m HEAD@{18}: commit: Code Segmentation
+[33m71f3128[m[33m ([m[1;32mswitch[m[33m)[m HEAD@{19}: checkout: moving from improvements to code_clean_up
+[33m71f3128[m[33m ([m[1;32mswitch[m[33m)[m HEAD@{20}: commit: Text Improvements
+[33m2c93f1d[m HEAD@{21}: commit: UI Improvements, Meeting Login Bypass, Library Improvement
+[33m83d80a2[m HEAD@{22}: checkout: moving from master to improvements
+[33m83d80a2[m HEAD@{23}: commit (initial): Initial Commit
