@@ -198,6 +198,8 @@ def render_about_tab(tab):
                     <li><strong>Direct Recording:</strong> Capture system audio without browser automation</li>
                     <li><strong>Multiple Formats:</strong> Supports MP3, WAV, M4A, OGG, and FLAC files</li>
                     <li><strong>Privacy First:</strong> All processing happens locally on your machine</li>
+                    <li><strong>Cloud API Powered:</strong> Fast processing using Hugging Face Inference API</li>
+
                 </ul>
 
                 <h4 style="margin-top: 2rem;">🛠️ How to Use</h4>

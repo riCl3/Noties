@@ -1,3 +1,4 @@
+
 # Core dependencies for Noties - Streamlit-based AI Meeting Summarizer
 streamlit>=1.29.0
 openai-whisper
@@ -15,3 +16,22 @@ transformers
 accelerate
 bitsandbytes
 peft
+
+streamlit>=1.29.0
+
+audioop-lts
+requests
+python-dotenv
+sounddevice
+soundfile
+numpy
+transformers
+torch
+accelerate
+openai-whisper
+
+
+# Optional: Use ffmpeg in system PATH for audio conversion
+# For system-wide audio routing, follow OS-specific setup notes below
+# For system-wide audio routing, follow OS-specific setup notes below
+
