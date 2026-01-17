@@ -1,15 +1,17 @@
-# Core dependencies for Noties - Streamlit-based AI Meeting Summarizer
-streamlit>=1.29.0
-openai-whisper
-google-generativeai>=0.3.2
-python-dotenv
-pydub
-sounddevice
-soundfile
-numpy
+# UI
+customtkinter>=5.2.0
 
-# Whisper requires PyTorch
+# Audio Capture & Processing
+sounddevice>=0.4.6
+soundfile>=0.12.1
+numpy>=1.26.0
+
+# Transcription
+openai-whisper>=20231117
 torch>=2.1.0
 
-# Optional: Use ffmpeg in system PATH for audio conversion
-# For system-wide audio routing, follow OS-specific setup notes below
+# LLM Integrations
+litellm>=1.0.0
+python-dotenv>=1.0.0
+
+# Note: ffmpeg is NOT required for basic operation as we use soundfile/numpy for processing.
